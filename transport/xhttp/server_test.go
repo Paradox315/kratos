@@ -25,7 +25,7 @@ func TestServer(t *testing.T) {
 			logger.New(logger.ConfigDefault),
 		),
 	)
-	httpSrv.WithRouter(func(r fiber.Router) {
+	httpSrv.Route(func(r fiber.Router) {
 		r.Get("hello", func(ctx *fiber.Ctx) error {
 			return ctx.SendString("hello")
 		})

@@ -58,9 +58,9 @@ func Middlewares(ms ...fiber.Handler) ServerOption {
 }
 
 // Router with server router
-func Router(r initRouters) ServerOption {
+func Router(r ...initRouters) ServerOption {
 	return func(s *Server) {
-		s.router = r
+		s.router = append(s.router, r...)
 	}
 }
 
@@ -84,7 +84,7 @@ type Server struct {
 	address  string
 	config   fiber.Config
 	ms       []fiber.Handler
-	router   initRouters
+	router   []initRouters
 	timeout  time.Duration
 	log      *log.Helper
 }
@@ -103,7 +103,9 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, m := range srv.ms {
 		srv.server.Use(m)
 	}
-	srv.router(srv.server)
+	for _, r := range srv.router {
+		r(srv.server)
+	}
 	srv.err = srv.listenAndEndpoint()
 	return srv
 }
@@ -149,7 +151,7 @@ func (s *Server) Stop(ctx context.Context) error {
 	return s.server.Shutdown()
 }
 
-func (s *Server) WithRouter(init initRouters) {
+func (s *Server) Route(init initRouters) {
 	init(s.server)
 }
 func (s *Server) listenAndEndpoint() error {
