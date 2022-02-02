@@ -2,6 +2,7 @@ package transport
 
 import (
 	"context"
+	"github.com/gofiber/fiber/v2"
 	"net/url"
 
 	// init encoding
@@ -61,8 +62,9 @@ func (k Kind) String() string { return string(k) }
 
 // Defines a set of transport kind
 const (
-	KindGRPC Kind = "grpc"
-	KindHTTP Kind = "http"
+	KindGRPC  Kind = "grpc"
+	KindHTTP  Kind = "http"
+	KindXHTTP Kind = "fasthttp"
 )
 
 type (
@@ -89,5 +91,18 @@ func NewClientContext(ctx context.Context, tr Transporter) context.Context {
 // FromClientContext returns the Transport value stored in ctx, if any.
 func FromClientContext(ctx context.Context) (tr Transporter, ok bool) {
 	tr, ok = ctx.Value(clientTransportKey{}).(Transporter)
+	return
+}
+
+type fiberKey struct{}
+
+// NewFiberContext returns a new Context that carries fiber.Ctx value.
+func NewFiberContext(ctx context.Context, c *fiber.Ctx) context.Context {
+	return context.WithValue(ctx, fiberKey{}, c)
+}
+
+// FromFiberContext returns the fiber.Ctx value stored in ctx, if any.
+func FromFiberContext(ctx context.Context) (c *fiber.Ctx, ok bool) {
+	c, ok = ctx.Value(fiberKey{}).(*fiber.Ctx)
 	return
 }
