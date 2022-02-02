@@ -51,21 +51,27 @@ func Listener(lis net.Listener) ServerOption {
 		s.lis = lis
 	}
 }
+func Middlewares(ms ...fiber.Handler) ServerOption {
+	return func(s *Server) {
+		s.ms = append(s.ms, ms...)
+	}
+}
 
-// Listener with server lis
+// Router with server router
+func Router(r initRouters) ServerOption {
+	return func(s *Server) {
+		s.router = r
+	}
+}
+
+// FiberConfig with server config
 func FiberConfig(cfg fiber.Config) ServerOption {
 	return func(s *Server) {
 		s.config = cfg
 	}
 }
 
-func Router(init InitRouters) ServerOption {
-	return func(s *Server) {
-		init(s.server)
-	}
-}
-
-type InitRouters func(r fiber.Router)
+type initRouters func(r fiber.Router)
 
 type Server struct {
 	server   *fiber.App
@@ -77,7 +83,8 @@ type Server struct {
 	network  string
 	address  string
 	config   fiber.Config
-	router   InitRouters
+	ms       []fiber.Handler
+	router   initRouters
 	timeout  time.Duration
 	log      *log.Helper
 }
@@ -93,6 +100,10 @@ func NewServer(opts ...ServerOption) *Server {
 		o(srv)
 	}
 	srv.server = fiber.New(srv.config)
+	for _, m := range srv.ms {
+		srv.server.Use(m)
+	}
+	srv.router(srv.server)
 	srv.err = srv.listenAndEndpoint()
 	return srv
 }
@@ -136,6 +147,10 @@ func (s *Server) Start(ctx context.Context) error {
 func (s *Server) Stop(ctx context.Context) error {
 	s.log.Info("[FIBER] server stopping")
 	return s.server.Shutdown()
+}
+
+func (s *Server) WithRouter(init initRouters) {
+	init(s.server)
 }
 func (s *Server) listenAndEndpoint() error {
 	if s.lis == nil {
