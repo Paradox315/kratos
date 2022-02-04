@@ -2,6 +2,7 @@ package json
 
 import (
 	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
 	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -21,6 +22,8 @@ var (
 	UnmarshalOptions = protojson.UnmarshalOptions{
 		DiscardUnknown: true,
 	}
+
+	jsonC = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 func init() {
@@ -33,18 +36,18 @@ type codec struct{}
 func (codec) Marshal(v interface{}) ([]byte, error) {
 	switch m := v.(type) {
 	case json.Marshaler:
-		return m.MarshalJSON()
+		return jsonC.Marshal(m)
 	case proto.Message:
 		return MarshalOptions.Marshal(m)
 	default:
-		return json.Marshal(m)
+		return jsonC.Marshal(m)
 	}
 }
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
 	switch m := v.(type) {
 	case json.Unmarshaler:
-		return m.UnmarshalJSON(data)
+		return jsonC.Unmarshal(data, m)
 	case proto.Message:
 		return UnmarshalOptions.Unmarshal(data, m)
 	default:
@@ -58,7 +61,7 @@ func (codec) Unmarshal(data []byte, v interface{}) error {
 		if m, ok := reflect.Indirect(rv).Interface().(proto.Message); ok {
 			return UnmarshalOptions.Unmarshal(data, m)
 		}
-		return json.Unmarshal(data, m)
+		return jsonC.Unmarshal(data, m)
 	}
 }
 

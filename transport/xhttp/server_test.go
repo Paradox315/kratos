@@ -18,7 +18,7 @@ func TestServer(t *testing.T) {
 				return ctx.JSON(fiber.Map{"status": http.StatusOK, "path": ctx.Path()})
 			})
 		}),
-		Middlewares(
+		Middleware(
 			recover.New(recover.Config{
 				EnableStackTrace: true,
 			}),

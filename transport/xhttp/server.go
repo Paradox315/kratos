@@ -51,7 +51,9 @@ func Listener(lis net.Listener) ServerOption {
 		s.lis = lis
 	}
 }
-func Middlewares(ms ...fiber.Handler) ServerOption {
+
+// Middleware with server middleware
+func Middleware(ms ...fiber.Handler) ServerOption {
 	return func(s *Server) {
 		s.ms = append(s.ms, ms...)
 	}
