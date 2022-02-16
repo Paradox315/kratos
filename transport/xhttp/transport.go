@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/gofiber/fiber/v2"
-	"github.com/valyala/fasthttp"
 )
 
 var _ Transporter = &Transport{}
@@ -12,7 +11,7 @@ var _ Transporter = &Transport{}
 // Transporter is fasthttp Transporter
 type Transporter interface {
 	transport.Transporter
-	Request() *fasthttp.Request
+	Request() *fiber.Ctx
 	PathTemplate() string
 }
 
@@ -20,9 +19,9 @@ type Transporter interface {
 type Transport struct {
 	endpoint     string
 	operation    string
-	reqHeader    reqHeaderCarrier
-	replyHeader  replyHeaderCarrier
-	request      *fasthttp.Request
+	reqHeader    *reqHeaderCarrier
+	replyHeader  *replyHeaderCarrier
+	request      *fiber.Ctx
 	pathTemplate string
 }
 
@@ -42,18 +41,18 @@ func (tr *Transport) Operation() string {
 }
 
 // Request returns the HTTP request.
-func (tr *Transport) Request() *fasthttp.Request {
+func (tr *Transport) Request() *fiber.Ctx {
 	return tr.request
 }
 
 // RequestHeader returns the request header.
 func (tr *Transport) RequestHeader() transport.Header {
-	return &tr.reqHeader
+	return tr.reqHeader
 }
 
 // ReplyHeader returns the reply header.
 func (tr *Transport) ReplyHeader() transport.Header {
-	return &tr.replyHeader
+	return tr.replyHeader
 }
 
 // PathTemplate returns the http path template.
@@ -71,7 +70,12 @@ func SetOperation(ctx context.Context, op string) {
 }
 
 type reqHeaderCarrier struct {
-	reqHeader fiber.Ctx
+	reqHeader *fiber.Ctx
+}
+
+// NewRequestHeader returns a new request header.
+func NewRequestHeader(ctx *fiber.Ctx) *reqHeaderCarrier {
+	return &reqHeaderCarrier{reqHeader: ctx}
 }
 
 // Get returns the value associated with the passed key.
@@ -94,7 +98,12 @@ func (hc *reqHeaderCarrier) Keys() []string {
 }
 
 type replyHeaderCarrier struct {
-	replyHeader fiber.Ctx
+	replyHeader *fiber.Ctx
+}
+
+// NewReplyHeaderCarrier returns a new reply header carrier.
+func NewReplyHeaderCarrier(replyHeader *fiber.Ctx) *replyHeaderCarrier {
+	return &replyHeaderCarrier{replyHeader: replyHeader}
 }
 
 // Get returns the value associated with the passed key.

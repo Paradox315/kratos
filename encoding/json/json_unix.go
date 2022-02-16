@@ -1,11 +1,11 @@
-//go:build windows
-// +build windows
+//go:build darwin || freebsd || linux
+// +build darwin freebsd linux
 
 package json
 
 import (
 	"encoding/json"
-	jsoniter "github.com/json-iterator/go"
+	jsonC "github.com/bytedance/sonic"
 	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -25,8 +25,6 @@ var (
 	UnmarshalOptions = protojson.UnmarshalOptions{
 		DiscardUnknown: true,
 	}
-
-	jsonC = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 func init() {

@@ -55,14 +55,14 @@ func Listener(lis net.Listener) ServerOption {
 // Middleware with server middleware
 func Middleware(ms ...fiber.Handler) ServerOption {
 	return func(s *Server) {
-		s.ms = append(s.ms, ms...)
+		s.ms = ms
 	}
 }
 
 // Router with server router
 func Router(r ...initRouters) ServerOption {
 	return func(s *Server) {
-		s.router = append(s.router, r...)
+		s.router = r
 	}
 }
 
@@ -73,6 +73,7 @@ func FiberConfig(cfg fiber.Config) ServerOption {
 	}
 }
 
+// initRouters is a function to initialize routers.
 type initRouters func(r fiber.Router)
 
 type Server struct {
@@ -112,6 +113,7 @@ func NewServer(opts ...ServerOption) *Server {
 	return srv
 }
 
+// Serve serves the server by options.
 func (s *Server) Serve() error {
 	return s.server.Listener(s.lis)
 }
@@ -121,6 +123,7 @@ func (s *Server) ServeTLS() error {
 	return s.server.Listener(s.lis)
 }
 
+// Endpoint returns the endpoint of the server.
 func (s *Server) Endpoint() (*url.URL, error) {
 	if s.err != nil {
 		return nil, s.err
@@ -153,9 +156,12 @@ func (s *Server) Stop(ctx context.Context) error {
 	return s.server.Shutdown()
 }
 
+// Route add a route to the FIBER server.
 func (s *Server) Route(init initRouters) {
 	init(s.server)
 }
+
+// listenAndEndpoint listen and get the endpoint.
 func (s *Server) listenAndEndpoint() error {
 	if s.lis == nil {
 		lis, err := net.Listen(s.network, s.address)
