@@ -68,8 +68,8 @@ func WithErr(err ...error) RespOption {
 	}
 }
 
-// NewResponse new response
-func NewResponse(opts ...RespOption) *Resp {
+// New response
+func New(opts ...RespOption) *Resp {
 	r := &Resp{}
 	for _, opt := range opts {
 		opt(r)
