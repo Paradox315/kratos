@@ -10,7 +10,7 @@ func TestResp_Send(t *testing.T) {
 	app := fiber.New()
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return SuccessResponse(
+		return Success(
 			WithData(fiber.Map{"name": "ok"}),
 		).Send(c)
 	})

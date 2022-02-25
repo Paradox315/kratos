@@ -6,9 +6,8 @@ import (
 )
 
 const (
-	Success      = "success"
-	Error        = "error"
-	Unauthorized = "unauthorized"
+	SuccessState = "success"
+	ErrorState   = "error"
 )
 
 // RespOption defines the options for the response
@@ -20,6 +19,25 @@ type Resp struct {
 	Msg  string      `json:"message"`
 	Data interface{} `json:"data"`
 	Err  []error     `json:"errors"`
+}
+
+func (r Resp) Send(c *fiber.Ctx) error {
+	return c.JSON(r)
+}
+
+func (r Resp) SendMessage(c *fiber.Ctx, msg string) error {
+	r.Msg = msg
+	return c.JSON(r)
+}
+
+func (r Resp) SendData(c *fiber.Ctx, data interface{}) error {
+	r.Data = data
+	return c.JSON(r)
+}
+
+func (r Resp) SendError(c *fiber.Ctx, err ...error) error {
+	r.Err = err
+	return c.JSON(r)
 }
 
 // WithCode function sets the response code
@@ -59,11 +77,11 @@ func NewResponse(opts ...RespOption) *Resp {
 	return r
 }
 
-// SuccessResponse success response
-func SuccessResponse(opts ...RespOption) *Resp {
+// Success response
+func Success(opts ...RespOption) *Resp {
 	r := &Resp{
 		Code: http.StatusOK,
-		Msg:  Success,
+		Msg:  SuccessState,
 	}
 	for _, opt := range opts {
 		opt(r)
@@ -71,45 +89,14 @@ func SuccessResponse(opts ...RespOption) *Resp {
 	return r
 }
 
-// ErrResponse error response
-func ErrResponse(opts ...RespOption) *Resp {
+// Error response
+func Error(opts ...RespOption) *Resp {
 	r := &Resp{
 		Code: http.StatusInternalServerError,
-		Msg:  Error,
+		Msg:  ErrorState,
 	}
 	for _, opt := range opts {
 		opt(r)
 	}
 	return r
-}
-
-// AuthErrResponse auth error response
-func AuthErrResponse(opts ...RespOption) *Resp {
-	r := &Resp{
-		Code: http.StatusUnauthorized,
-		Msg:  Unauthorized,
-	}
-	for _, opt := range opts {
-		opt(r)
-	}
-	return r
-}
-
-func (r Resp) Send(c *fiber.Ctx) error {
-	return c.JSON(r)
-}
-
-func (r Resp) SendMessage(c *fiber.Ctx, msg string) error {
-	r.Msg = msg
-	return c.JSON(r)
-}
-
-func (r Resp) SendData(c *fiber.Ctx, data interface{}) error {
-	r.Data = data
-	return c.JSON(r)
-}
-
-func (r Resp) SendError(c *fiber.Ctx, err ...error) error {
-	r.Err = err
-	return c.JSON(r)
 }
