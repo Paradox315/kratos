@@ -14,6 +14,9 @@ import (
 	"time"
 )
 
+// SupportPackageIsVersion1 These constants should not be referenced from any other code.
+const SupportPackageIsVersion1 = true
+
 // ServerOption is an HTTP server option.
 type ServerOption func(*Server)
 
