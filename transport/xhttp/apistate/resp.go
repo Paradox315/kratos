@@ -5,39 +5,84 @@ import (
 	"net/http"
 )
 
-const (
-	SuccessState = "success"
-	ErrorState   = "error"
-)
-
 // RespOption defines the options for the response
 type RespOption func(*Resp)
 
 // Resp	represents the response of the API
 type Resp struct {
-	Code int         `json:"code"`
-	Msg  string      `json:"message"`
-	Data interface{} `json:"data"`
-	Err  []error     `json:"errors"`
+	Code int         `json:"code,omitempty"`
+	Msg  string      `json:"message,omitempty"`
+	Data interface{} `json:"data,omitempty"`
+	Err  []error     `json:"errors,omitempty"`
 }
 
+// SetCode sets the response code
+func (r *Resp) SetCode(code int) *Resp {
+	r.Code = code
+	return r
+}
+
+// SetMsg sets the message of the response
+func (r *Resp) SetMsg(msg string) *Resp {
+	r.Msg = msg
+	return r
+}
+
+// SetData sets the data of the response
+func (r *Resp) SetData(data interface{}) *Resp {
+	r.Data = data
+	return r
+}
+
+// SetErr sets the error
+func (r *Resp) SetErr(err ...error) *Resp {
+	r.Err = err
+	return r
+}
+
+// Send sends the response
 func (r Resp) Send(c *fiber.Ctx) error {
-	return c.JSON(r)
+	if http.StatusText(r.Code) == "" {
+		r.Msg = http.StatusText(http.StatusInternalServerError)
+		return c.Status(http.StatusInternalServerError).JSON(r)
+	}
+	if r.Msg == "" {
+		r.Msg = http.StatusText(r.Code)
+	}
+	return c.Status(r.Code).JSON(r)
 }
 
+// SendMessage sends the response with the message
 func (r Resp) SendMessage(c *fiber.Ctx, msg string) error {
 	r.Msg = msg
-	return c.JSON(r)
+	if http.StatusText(r.Code) == "" {
+		return c.Status(http.StatusInternalServerError).JSON(r)
+	}
+	return c.Status(r.Code).JSON(r)
 }
 
+// SendData sends the response with the data
 func (r Resp) SendData(c *fiber.Ctx, data interface{}) error {
 	r.Data = data
-	return c.JSON(r)
+	if http.StatusText(r.Code) == "" {
+		return c.Status(http.StatusInternalServerError).JSON(r)
+	}
+	if r.Msg == "" {
+		r.Msg = http.StatusText(r.Code)
+	}
+	return c.Status(r.Code).JSON(r)
 }
 
+// SendError sends the response with the error
 func (r Resp) SendError(c *fiber.Ctx, err ...error) error {
 	r.Err = err
-	return c.JSON(r)
+	if http.StatusText(r.Code) == "" {
+		return c.Status(http.StatusInternalServerError).JSON(r)
+	}
+	if r.Msg == "" {
+		r.Msg = http.StatusText(r.Code)
+	}
+	return c.Status(r.Code).JSON(r)
 }
 
 // WithCode function sets the response code
@@ -81,7 +126,7 @@ func New(opts ...RespOption) *Resp {
 func Success(opts ...RespOption) *Resp {
 	r := &Resp{
 		Code: http.StatusOK,
-		Msg:  SuccessState,
+		Msg:  http.StatusText(http.StatusOK),
 	}
 	for _, opt := range opts {
 		opt(r)
@@ -93,7 +138,7 @@ func Success(opts ...RespOption) *Resp {
 func Error(opts ...RespOption) *Resp {
 	r := &Resp{
 		Code: http.StatusInternalServerError,
-		Msg:  ErrorState,
+		Msg:  http.StatusText(http.StatusInternalServerError),
 	}
 	for _, opt := range opts {
 		opt(r)

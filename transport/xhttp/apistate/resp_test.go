@@ -10,10 +10,10 @@ func TestResp_Send(t *testing.T) {
 	app := fiber.New()
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return Success(
-			WithData(fiber.Map{"name": "ok"}),
-		).Send(c)
+		return Success().SetData(map[string]interface{}{
+			"name": "John",
+		}).SetMsg("Hello, John!").Send(c)
 	})
 
-	log.Fatal(app.Listen(":3000"))
+	log.Fatal(app.Listen(":13000"))
 }
