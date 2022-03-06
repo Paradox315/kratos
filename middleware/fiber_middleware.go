@@ -6,10 +6,11 @@ import (
 
 // Constants for the middleware
 const (
-	AuthenticatorCfg = "Authenticator"
-	AuthorizerCfg    = "Authorizer"
-	OperationsCfg    = "Operations"
-	ValidatorCfg     = "Validator"
+	SupportPackageIsVersion1 = true
+	AuthenticatorCfg         = "Authenticator"
+	AuthorizerCfg            = "Authorizer"
+	OperationsCfg            = "Operations"
+	ValidatorCfg             = "Validator"
 )
 
 var middlewareConf = map[string]FiberMiddleware{
