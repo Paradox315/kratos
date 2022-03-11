@@ -58,7 +58,8 @@ func Authenticator() fiber.Handler {
 	if mw, ok := middlewareConf[AuthenticatorCfg]; ok {
 		return mw.MiddlewareFunc()
 	}
-	return defaultMiddleware().MiddlewareFunc()
+	middlewareConf[AuthenticatorCfg] = defaultMiddleware()
+	return middlewareConf[AuthenticatorCfg].MiddlewareFunc()
 }
 
 // Authorizer returns the Authorizer middleware
@@ -66,7 +67,8 @@ func Authorizer() fiber.Handler {
 	if mw, ok := middlewareConf[AuthorizerCfg]; ok {
 		return mw.MiddlewareFunc()
 	}
-	return defaultMiddleware().MiddlewareFunc()
+	middlewareConf[AuthorizerCfg] = defaultMiddleware()
+	return middlewareConf[AuthorizerCfg].MiddlewareFunc()
 }
 
 // Operations returns the Operations middleware
@@ -74,7 +76,8 @@ func Operations() fiber.Handler {
 	if mw, ok := middlewareConf[OperationsCfg]; ok {
 		return mw.MiddlewareFunc()
 	}
-	return defaultMiddleware().MiddlewareFunc()
+	middlewareConf[OperationsCfg] = defaultMiddleware()
+	return middlewareConf[OperationsCfg].MiddlewareFunc()
 }
 
 // CustomMiddleware returns a custom middleware with your config key
@@ -82,5 +85,6 @@ func CustomMiddleware(name string) fiber.Handler {
 	if mw, ok := middlewareConf[name]; ok {
 		return mw.MiddlewareFunc()
 	}
-	return defaultMiddleware().MiddlewareFunc()
+	middlewareConf[name] = defaultMiddleware()
+	return middlewareConf[name].MiddlewareFunc()
 }
