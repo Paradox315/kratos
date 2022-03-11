@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	validate "github.com/go-kratos/kratos/v2/middleware/fiber_validate"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -11,19 +10,12 @@ const (
 	AuthenticatorCfg         = "Authenticator"
 	AuthorizerCfg            = "Authorizer"
 	OperationsCfg            = "Operations"
-	ValidatorCfg             = "Validator"
-)
-const (
-	BodyTyp = iota + 1
-	QueryTyp
-	ParamTyp
 )
 
 var middlewareConf = map[string]FiberMiddleware{
 	AuthenticatorCfg: defaultMiddleware(),
 	AuthorizerCfg:    defaultMiddleware(),
 	OperationsCfg:    defaultMiddleware(),
-	ValidatorCfg:     validate.NewBodyValidator(),
 }
 
 // FiberMiddleware is a middleware for Fiber
@@ -80,26 +72,6 @@ func Authorizer() fiber.Handler {
 // Operations returns the Operations middleware
 func Operations() fiber.Handler {
 	if mw, ok := middlewareConf[OperationsCfg]; ok {
-		return mw.MiddlewareFunc()
-	}
-	return defaultMiddleware().MiddlewareFunc()
-}
-
-// Validator returns the Validator middleware
-func Validator(typ ...int) fiber.Handler {
-	if len(typ) > 0 {
-		switch typ[0] {
-		case QueryTyp:
-			return validate.NewQueryValidator().MiddlewareFunc()
-		case BodyTyp:
-			return validate.NewBodyValidator().MiddlewareFunc()
-		case ParamTyp:
-			return validate.NewParamsValidator().MiddlewareFunc()
-		default:
-			return defaultMiddleware().MiddlewareFunc()
-		}
-	}
-	if mw, ok := middlewareConf[ValidatorCfg]; ok {
 		return mw.MiddlewareFunc()
 	}
 	return defaultMiddleware().MiddlewareFunc()

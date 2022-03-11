@@ -13,7 +13,7 @@ type Resp struct {
 	Code int         `json:"code,omitempty"`
 	Msg  string      `json:"message,omitempty"`
 	Data interface{} `json:"data,omitempty"`
-	Err  []error     `json:"errors,omitempty"`
+	Err  []string    `json:"errors,omitempty"`
 }
 
 // SetCode sets the response code
@@ -34,8 +34,8 @@ func (r *Resp) SetData(data interface{}) *Resp {
 	return r
 }
 
-// SetErr sets the error
-func (r *Resp) SetErr(err ...error) *Resp {
+// SetError sets the error
+func (r *Resp) SetError(err ...string) *Resp {
 	r.Err = err
 	return r
 }
@@ -74,7 +74,7 @@ func (r Resp) SendData(c *fiber.Ctx, data interface{}) error {
 }
 
 // SendError sends the response with the error
-func (r Resp) SendError(c *fiber.Ctx, err ...error) error {
+func (r Resp) SendError(c *fiber.Ctx, err ...string) error {
 	r.Err = err
 	if http.StatusText(r.Code) == "" {
 		return c.Status(http.StatusInternalServerError).JSON(r)
@@ -107,7 +107,7 @@ func WithData(data interface{}) RespOption {
 }
 
 // WithErr function sets the response error
-func WithErr(err ...error) RespOption {
+func WithErr(err ...string) RespOption {
 	return func(r *Resp) {
 		r.Err = err
 	}
@@ -139,6 +139,30 @@ func Error(opts ...RespOption) *Resp {
 	r := &Resp{
 		Code: http.StatusInternalServerError,
 		Msg:  http.StatusText(http.StatusInternalServerError),
+	}
+	for _, opt := range opts {
+		opt(r)
+	}
+	return r
+}
+
+// AuthError response
+func AuthError(opts ...RespOption) *Resp {
+	r := &Resp{
+		Code: http.StatusUnauthorized,
+		Msg:  http.StatusText(http.StatusUnauthorized),
+	}
+	for _, opt := range opts {
+		opt(r)
+	}
+	return r
+}
+
+// InvalidError response
+func InvalidError(opts ...RespOption) *Resp {
+	r := &Resp{
+		Code: http.StatusBadRequest,
+		Msg:  http.StatusText(http.StatusBadRequest) + " - Validation Error",
 	}
 	for _, opt := range opts {
 		opt(r)
