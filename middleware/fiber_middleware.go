@@ -46,11 +46,11 @@ func defaultMiddleware() *UnimplementedMiddleware {
 }
 
 // RegisterMiddleware registers a middleware
-func RegisterMiddleware(name string, mw FiberMiddleware) {
+func RegisterMiddleware(mw FiberMiddleware) {
 	if middlewareConf == nil {
 		middlewareConf = make(map[string]FiberMiddleware)
 	}
-	middlewareConf[name] = mw
+	middlewareConf[mw.Name()] = mw
 }
 
 // Authenticator returns the Authenticator middleware
