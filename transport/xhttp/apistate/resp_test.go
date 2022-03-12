@@ -1,8 +1,10 @@
-package ApiState
+package apistate
 
 import (
 	"errors"
+	kerrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/gofiber/fiber/v2"
+
 	"log"
 	"testing"
 )
@@ -10,10 +12,22 @@ import (
 func TestResp_Send(t *testing.T) {
 	app := fiber.New()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return Success().SetData(map[string]interface{}{
-			"name": "John",
-		}).SetMsg("Hello, John!").SetError(errors.New("valid error").Error()).Send(c)
+	app.Get("/err1", func(c *fiber.Ctx) error {
+		return Error().WithError(kerrors.BadRequest("test", "test error")).Send(c)
+	})
+
+	app.Get("/err1/1", func(c *fiber.Ctx) error {
+		return Error().WithError(kerrors.New(20000, "test", "test error")).Send(c)
+	})
+
+	app.Get("/err2", func(c *fiber.Ctx) error {
+		return Error().WithError(errors.New("test error")).Send(c)
+	})
+
+	app.Get("/success", func(c *fiber.Ctx) error {
+		return Success().WithData(fiber.Map{
+			"name": "kratos success",
+		}).Send(c)
 	})
 
 	log.Fatal(app.Listen(":3000"))

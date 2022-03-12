@@ -1,171 +1,95 @@
-package ApiState
+package apistate
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"net/http"
-)
 
-// RespOption defines the options for the response
-type RespOption func(*Resp)
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/gofiber/fiber/v2"
+)
 
 // Resp	represents the response of the API
 type Resp struct {
-	Code int         `json:"code,omitempty"`
-	Msg  string      `json:"message,omitempty"`
-	Data interface{} `json:"data,omitempty"`
-	Err  []string    `json:"errors,omitempty"`
+	Code     int         `json:"code,omitempty"`
+	Message  string      `json:"message,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty"`
+	Error    interface{} `json:"error,omitempty"`
 }
 
-// SetCode sets the response code
-func (r *Resp) SetCode(code int) *Resp {
+// WithCode sets the response code
+func (r *Resp) WithCode(code int) *Resp {
 	r.Code = code
 	return r
 }
 
-// SetMsg sets the message of the response
-func (r *Resp) SetMsg(msg string) *Resp {
-	r.Msg = msg
+// WithMessage sets the message of the response
+func (r *Resp) WithMessage(msg string) *Resp {
+	r.Message = msg
 	return r
 }
 
-// SetData sets the data of the response
-func (r *Resp) SetData(data interface{}) *Resp {
-	r.Data = data
+// WithData sets the data of the response
+func (r *Resp) WithData(data interface{}) *Resp {
+	r.Metadata = data
 	return r
 }
 
-// SetError sets the error
-func (r *Resp) SetError(err ...string) *Resp {
-	r.Err = err
+// WithError sets the error
+func (r *Resp) WithError(err interface{}) *Resp {
+	if err, ok := err.(*errors.Error); ok {
+		r.Error = err
+	} else {
+		r.Error = err.Error()
+	}
 	return r
 }
 
 // Send sends the response
-func (r Resp) Send(c *fiber.Ctx) error {
+func (r *Resp) Send(c *fiber.Ctx) error {
+	if err, ok := r.Error.(*errors.Error); ok {
+		if http.StatusText(int(err.Code)) == "" {
+			return c.Status(http.StatusInternalServerError).JSON(err)
+		}
+		return c.Status(int(err.Code)).JSON(err)
+	}
+
 	if http.StatusText(r.Code) == "" {
-		r.Msg = http.StatusText(http.StatusInternalServerError)
+		r.Message = http.StatusText(http.StatusInternalServerError)
 		return c.Status(http.StatusInternalServerError).JSON(r)
 	}
-	if r.Msg == "" {
-		r.Msg = http.StatusText(r.Code)
+	if r.Message == "" {
+		r.Message = http.StatusText(r.Code)
 	}
 	return c.Status(r.Code).JSON(r)
-}
-
-// SendMessage sends the response with the message
-func (r Resp) SendMessage(c *fiber.Ctx, msg string) error {
-	r.Msg = msg
-	if http.StatusText(r.Code) == "" {
-		return c.Status(http.StatusInternalServerError).JSON(r)
-	}
-	return c.Status(r.Code).JSON(r)
-}
-
-// SendData sends the response with the data
-func (r Resp) SendData(c *fiber.Ctx, data interface{}) error {
-	r.Data = data
-	if http.StatusText(r.Code) == "" {
-		return c.Status(http.StatusInternalServerError).JSON(r)
-	}
-	if r.Msg == "" {
-		r.Msg = http.StatusText(r.Code)
-	}
-	return c.Status(r.Code).JSON(r)
-}
-
-// SendError sends the response with the error
-func (r Resp) SendError(c *fiber.Ctx, err ...string) error {
-	r.Err = err
-	if http.StatusText(r.Code) == "" {
-		return c.Status(http.StatusInternalServerError).JSON(r)
-	}
-	if r.Msg == "" {
-		r.Msg = http.StatusText(r.Code)
-	}
-	return c.Status(r.Code).JSON(r)
-}
-
-// WithCode function sets the response code
-func WithCode(code int) RespOption {
-	return func(r *Resp) {
-		r.Code = code
-	}
-}
-
-// WithMsg function sets the response message
-func WithMsg(msg string) RespOption {
-	return func(r *Resp) {
-		r.Msg = msg
-	}
-}
-
-// WithData function sets the response data
-func WithData(data interface{}) RespOption {
-	return func(r *Resp) {
-		r.Data = data
-	}
-}
-
-// WithErr function sets the response error
-func WithErr(err ...string) RespOption {
-	return func(r *Resp) {
-		r.Err = err
-	}
-}
-
-// New response
-func New(opts ...RespOption) *Resp {
-	r := &Resp{}
-	for _, opt := range opts {
-		opt(r)
-	}
-	return r
 }
 
 // Success response
-func Success(opts ...RespOption) *Resp {
-	r := &Resp{
-		Code: http.StatusOK,
-		Msg:  http.StatusText(http.StatusOK),
+func Success() *Resp {
+	return &Resp{
+		Code:    http.StatusOK,
+		Message: http.StatusText(http.StatusOK),
 	}
-	for _, opt := range opts {
-		opt(r)
-	}
-	return r
 }
 
 // Error response
-func Error(opts ...RespOption) *Resp {
-	r := &Resp{
-		Code: http.StatusInternalServerError,
-		Msg:  http.StatusText(http.StatusInternalServerError),
+func Error() *Resp {
+	return &Resp{
+		Code:    http.StatusInternalServerError,
+		Message: http.StatusText(http.StatusInternalServerError),
 	}
-	for _, opt := range opts {
-		opt(r)
-	}
-	return r
 }
 
 // AuthError response
-func AuthError(opts ...RespOption) *Resp {
-	r := &Resp{
-		Code: http.StatusUnauthorized,
-		Msg:  http.StatusText(http.StatusUnauthorized),
+func AuthError() *Resp {
+	return &Resp{
+		Code:    http.StatusUnauthorized,
+		Message: http.StatusText(http.StatusUnauthorized),
 	}
-	for _, opt := range opts {
-		opt(r)
-	}
-	return r
 }
 
 // InvalidError response
-func InvalidError(opts ...RespOption) *Resp {
-	r := &Resp{
-		Code: http.StatusBadRequest,
-		Msg:  http.StatusText(http.StatusBadRequest) + " - Validation Error",
+func InvalidError() *Resp {
+	return &Resp{
+		Code:    http.StatusBadRequest,
+		Message: http.StatusText(http.StatusBadRequest) + " - Validation Error",
 	}
-	for _, opt := range opts {
-		opt(r)
-	}
-	return r
 }
