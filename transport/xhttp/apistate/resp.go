@@ -2,6 +2,7 @@ package apistate
 
 import (
 	"net/http"
+	"reflect"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/gofiber/fiber/v2"
@@ -37,9 +38,10 @@ func (r *Resp) WithData(data interface{}) *Resp {
 func (r *Resp) WithError(err interface{}) *Resp {
 	if err, ok := err.(*errors.Error); ok {
 		r.Error = err
-	} else {
-		r.Error = err.Error()
+		return r
 	}
+	errMsg := reflect.ValueOf(err).MethodByName("Error").Call(nil)
+	r.Error = errMsg[0].Interface()
 	return r
 }
 

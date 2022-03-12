@@ -4,10 +4,19 @@ import (
 	"errors"
 	kerrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/gofiber/fiber/v2"
+	"strings"
 
 	"log"
 	"testing"
 )
+
+type T struct {
+	errs []string
+}
+
+func (t T) Error() string {
+	return strings.Join(t.errs, ";")
+}
 
 func TestResp_Send(t *testing.T) {
 	app := fiber.New()
@@ -21,7 +30,7 @@ func TestResp_Send(t *testing.T) {
 	})
 
 	app.Get("/err2", func(c *fiber.Ctx) error {
-		return Error().WithError(errors.New("test error")).Send(c)
+		return Error().WithError(errors.New("hello noonoo")).Send(c)
 	})
 
 	app.Get("/success", func(c *fiber.Ctx) error {
