@@ -164,6 +164,10 @@ func (s *Server) Route(init initRouters) {
 	init(s.server)
 }
 
+func (s Server) Routers() [][]*fiber.Route {
+	return s.server.Stack()
+}
+
 // listenAndEndpoint listen and get the endpoint.
 func (s *Server) listenAndEndpoint() error {
 	if s.lis == nil {
