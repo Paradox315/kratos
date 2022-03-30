@@ -22,19 +22,19 @@ func TestResp_Send(t *testing.T) {
 	app := fiber.New()
 
 	app.Get("/err1", func(c *fiber.Ctx) error {
-		return Error().WithError(kerrors.BadRequest("test", "test error")).Send(c)
+		return Error[any]().WithError(kerrors.BadRequest("test", "test error")).Send(c)
 	})
 
 	app.Get("/err1/1", func(c *fiber.Ctx) error {
-		return Error().WithError(kerrors.New(20000, "test", "test error")).Send(c)
+		return Error[any]().WithError(kerrors.New(20000, "test", "test error")).Send(c)
 	})
 
 	app.Get("/err2", func(c *fiber.Ctx) error {
-		return Error().WithError(errors.New("hello noonoo")).Send(c)
+		return Error[any]().WithError(errors.New("hello noonoo")).Send(c)
 	})
 
 	app.Get("/success", func(c *fiber.Ctx) error {
-		return Success().WithData(fiber.Map{
+		return Success[fiber.Map]().WithData(fiber.Map{
 			"name": "kratos success",
 		}).Send(c)
 	})

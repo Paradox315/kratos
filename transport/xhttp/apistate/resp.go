@@ -9,33 +9,33 @@ import (
 )
 
 // Resp	represents the response of the API
-type Resp struct {
+type Resp[T any] struct {
 	Code     int         `json:"code,omitempty"`
 	Message  string      `json:"message,omitempty"`
-	Metadata interface{} `json:"metadata,omitempty"`
+	Metadata T           `json:"metadata,omitempty"`
 	Error    interface{} `json:"error,omitempty"`
 }
 
 // WithCode sets the response code
-func (r *Resp) WithCode(code int) *Resp {
+func (r *Resp[T]) WithCode(code int) *Resp[T] {
 	r.Code = code
 	return r
 }
 
 // WithMessage sets the message of the response
-func (r *Resp) WithMessage(msg string) *Resp {
+func (r *Resp[T]) WithMessage(msg string) *Resp[T] {
 	r.Message = msg
 	return r
 }
 
 // WithData sets the data of the response
-func (r *Resp) WithData(data interface{}) *Resp {
+func (r *Resp[T]) WithData(data T) *Resp[T] {
 	r.Metadata = data
 	return r
 }
 
 // WithError sets the error
-func (r *Resp) WithError(err interface{}) *Resp {
+func (r *Resp[T]) WithError(err any) *Resp[T] {
 	if err, ok := err.(*errors.Error); ok {
 		r.Error = err
 		return r
@@ -46,7 +46,7 @@ func (r *Resp) WithError(err interface{}) *Resp {
 }
 
 // Send sends the response
-func (r *Resp) Send(c *fiber.Ctx) error {
+func (r *Resp[T]) Send(c *fiber.Ctx) error {
 	if err, ok := r.Error.(*errors.Error); ok {
 		if http.StatusText(int(err.Code)) == "" {
 			return c.Status(http.StatusInternalServerError).JSON(err)
@@ -65,33 +65,17 @@ func (r *Resp) Send(c *fiber.Ctx) error {
 }
 
 // Success response
-func Success() *Resp {
-	return &Resp{
+func Success[T any]() *Resp[T] {
+	return &Resp[T]{
 		Code:    http.StatusOK,
 		Message: http.StatusText(http.StatusOK),
 	}
 }
 
 // Error response
-func Error() *Resp {
-	return &Resp{
+func Error[T any]() *Resp[T] {
+	return &Resp[T]{
 		Code:    http.StatusInternalServerError,
 		Message: http.StatusText(http.StatusInternalServerError),
-	}
-}
-
-// AuthError response
-func AuthError() *Resp {
-	return &Resp{
-		Code:    http.StatusUnauthorized,
-		Message: http.StatusText(http.StatusUnauthorized),
-	}
-}
-
-// InvalidError response
-func InvalidError() *Resp {
-	return &Resp{
-		Code:    http.StatusBadRequest,
-		Message: http.StatusText(http.StatusBadRequest) + " - Validation Error",
 	}
 }
