@@ -164,11 +164,6 @@ func (s *Server) Route(init initRouters) {
 	init(s.server)
 }
 
-// Routers get all routers of the FIBER server.
-func (s *Server) Routers() [][]*fiber.Route {
-	return s.server.Stack()
-}
-
 // OnStart registers a callback function that is invoked when the server is started.
 func (s *Server) OnStart(f func() error) {
 	s.server.Hooks().OnListen(f)
