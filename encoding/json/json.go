@@ -4,12 +4,11 @@ package json
 
 import (
 	"encoding/json"
-	gojson "github.com/goccy/go-json"
-	"reflect"
-
 	"github.com/go-kratos/kratos/v2/encoding"
+	gojson "github.com/goccy/go-json"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+	"reflect"
 )
 
 // Name is the name registered for the json codec.
