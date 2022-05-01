@@ -11,6 +11,7 @@ const (
 	AuthenticatorCfg         = "Authenticator"
 	AuthorizerCfg            = "Authorizer"
 	OperationsCfg            = "Operations"
+	LoggerCfg                = "Logger"
 	CacheCfg                 = "Cache"
 	LimiterCfg               = "Limiter"
 )
@@ -19,6 +20,7 @@ var middlewareConf = map[string]FiberMiddleware{
 	AuthenticatorCfg: defaultMiddleware(),
 	AuthorizerCfg:    defaultMiddleware(),
 	OperationsCfg:    defaultMiddleware(),
+	LoggerCfg:        defaultMiddleware(),
 	CacheCfg:         defaultMiddleware(),
 	LimiterCfg:       defaultMiddleware(),
 }
@@ -96,6 +98,14 @@ func Operations() fiber.Handler {
 		return mw.MiddlewareFunc()
 	}
 	return middlewareConf[OperationsCfg].MiddlewareFunc()
+}
+
+// Logger returns the Logger middleware
+func Logger() fiber.Handler {
+	if mw, ok := middlewareConf[LoggerCfg]; ok {
+		return mw.MiddlewareFunc()
+	}
+	return middlewareConf[LoggerCfg].MiddlewareFunc()
 }
 
 // CustomMiddleware returns a custom middleware with your config key

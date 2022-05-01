@@ -8,7 +8,6 @@ import (
 	gojson "github.com/goccy/go-json"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-	"reflect"
 )
 
 // Name is the name registered for the json codec.
@@ -50,16 +49,6 @@ func (codec) Unmarshal(data []byte, v interface{}) error {
 	case proto.Message:
 		return UnmarshalOptions.Unmarshal(data, m)
 	default:
-		rv := reflect.ValueOf(v)
-		for rv := rv; rv.Kind() == reflect.Ptr; {
-			if rv.IsNil() {
-				rv.Set(reflect.New(rv.Type().Elem()))
-			}
-			rv = rv.Elem()
-		}
-		if m, ok := reflect.Indirect(rv).Interface().(proto.Message); ok {
-			return UnmarshalOptions.Unmarshal(data, m)
-		}
 		return gojson.Unmarshal(data, m)
 	}
 }

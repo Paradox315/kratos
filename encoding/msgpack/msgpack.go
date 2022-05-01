@@ -20,7 +20,7 @@ func (codec) Marshal(v interface{}) ([]byte, error) {
 }
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
-	return msgpack.Unmarshal(data, &v)
+	return msgpack.Unmarshal(data, v)
 }
 
 func (codec) Name() string {
