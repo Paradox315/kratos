@@ -15,6 +15,7 @@ require (
 	github.com/imdario/mergo v0.3.12
 	github.com/stretchr/testify v1.7.0
 	github.com/valyala/fasthttp v1.35.0
+	github.com/vmihailenco/msgpack/v5 v5.3.5
 	go.opentelemetry.io/otel v1.3.0
 	go.opentelemetry.io/otel/sdk v1.3.0
 	go.opentelemetry.io/otel/trace v1.3.0
@@ -45,7 +46,6 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
