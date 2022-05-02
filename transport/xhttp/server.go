@@ -3,22 +3,23 @@ package xhttp
 import (
 	"context"
 	"crypto/tls"
+	"github.com/go-kratos/kratos/v2/encoding/msgpack"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/gofiber/fiber/v2"
 	"github.com/valyala/fasthttp"
-	"github.com/vmihailenco/msgpack/v5"
 	"net"
 	"net/url"
 	"time"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
-const SupportPackageIsVersion1 = true
-
-var _ = msgpack.UnregisterExt
+const (
+	SupportPackageIsVersion1 = true
+	MsgPackName              = msgpack.Name
+)
 
 // ServerOption is an HTTP server option.
 type ServerOption func(*Server)
