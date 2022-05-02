@@ -3,6 +3,7 @@ package xhttp
 import (
 	"context"
 	"crypto/tls"
+	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/internal/host"
@@ -16,6 +17,8 @@ import (
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
+
+var _ = encoding.GetCodec("msgpack")
 
 // ServerOption is an HTTP server option.
 type ServerOption func(*Server)

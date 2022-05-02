@@ -11,12 +11,19 @@ type Resp[T any] struct {
 	Code     int32  `json:"code,omitempty"`
 	Message  string `json:"message,omitempty"`
 	Metadata T      `json:"metadata,omitempty"`
+	Reason   string `json:"reason,omitempty"`
 	Error    any    `json:"error,omitempty"`
 }
 
 // WithCode sets the response code
-func (r *Resp[T]) WithCode(code int32) *Resp[T] {
-	r.Code = code
+func (r *Resp[T]) WithCode(code int) *Resp[T] {
+	r.Code = int32(code)
+	// if you can find the reason, set it
+	if reason := utils.StatusMessage(code); reason != "" {
+		r.Reason = reason
+	} else {
+		r.Reason = "Custom reason"
+	}
 	return r
 }
 
@@ -38,26 +45,18 @@ func (r *Resp[T]) WithError(err any) *Resp[T] {
 		r.Error = err
 		return r
 	}
-	r.Error = err
 	r.Message = err.(error).Error()
 	return r
 }
 
 // Send sends the response
 func (r *Resp[T]) Send(c *fiber.Ctx) error {
+	// if the response is a kratos error, we send the error
 	if err, ok := r.Error.(*errors.Error); ok {
 		if utils.StatusMessage(int(err.Code)) == "" {
 			return c.Status(fiber.StatusInternalServerError).JSON(err)
 		}
 		return c.Status(int(err.Code)).JSON(err)
-	}
-
-	if message := utils.StatusMessage(int(r.Code)); message == "" {
-		r.Message = message
-		return c.Status(fiber.StatusInternalServerError).JSON(r)
-	}
-	if r.Message == "" {
-		r.Message = utils.StatusMessage(int(r.Code))
 	}
 	return c.Status(int(r.Code)).JSON(r)
 }
@@ -66,6 +65,7 @@ func (r *Resp[T]) Send(c *fiber.Ctx) error {
 func Success[T any]() *Resp[T] {
 	return &Resp[T]{
 		Code:    fiber.StatusOK,
+		Reason:  utils.StatusMessage(fiber.StatusOK),
 		Message: "success",
 	}
 }
@@ -73,15 +73,15 @@ func Success[T any]() *Resp[T] {
 // Error response
 func Error[T any]() *Resp[T] {
 	return &Resp[T]{
-		Code:    fiber.StatusInternalServerError,
-		Message: utils.StatusMessage(fiber.StatusInternalServerError),
+		Code:   fiber.StatusInternalServerError,
+		Reason: utils.StatusMessage(fiber.StatusInternalServerError),
 	}
 }
 
 // InvalidError response
 func InvalidError[T any]() *Resp[T] {
 	return &Resp[T]{
-		Code:    fiber.StatusBadRequest,
-		Message: utils.StatusMessage(fiber.StatusBadRequest),
+		Code:   fiber.StatusBadRequest,
+		Reason: utils.StatusMessage(fiber.StatusBadRequest),
 	}
 }
