@@ -1,6 +1,11 @@
 package msgpack
 
-import "testing"
+import (
+	"github.com/go-kratos/kratos/v2/encoding"
+	"testing"
+)
+
+const contentType = "msgpack"
 
 type testModel struct {
 	Field1 string
@@ -15,7 +20,7 @@ func Test_Msgpack(t *testing.T) {
 		Field3: true,
 	}
 	t.Log(m)
-	co := codec{}
+	co := encoding.GetCodec(contentType)
 	bytes, _ := co.Marshal(m)
 	var m2 *testModel
 	_ = co.Unmarshal(bytes, &m2)
