@@ -3,12 +3,12 @@ module github.com/go-kratos/kratos/v2
 go 1.18
 
 require (
-	github.com/bytedance/sonic v1.2.0
+	github.com/bytedance/sonic v1.3.0
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-kratos/aegis v0.1.1
 	github.com/go-playground/form/v4 v4.2.0
 	github.com/goccy/go-json v0.9.7
-	github.com/gofiber/fiber/v2 v2.32.0
+	github.com/gofiber/fiber/v2 v2.33.0
 	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0

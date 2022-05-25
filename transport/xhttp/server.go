@@ -122,7 +122,7 @@ func NewServer(opts ...ServerOption) *Server {
 
 // Serve serves the server by options.
 func (s *Server) Serve() error {
-	return s.server.Listener(s.lis)
+	return s.server.Listen(s.address)
 }
 
 // ServeTLS TODO: not implemented yet

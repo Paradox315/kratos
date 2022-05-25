@@ -14,15 +14,14 @@ type testModel struct {
 }
 
 func Test_Msgpack(t *testing.T) {
-	m := &testModel{
-		Field1: "test",
-		Field2: 1,
-		Field3: true,
+	m := map[string]float32{
+		"pi": 0,
+		"e":  0,
 	}
 	t.Log(m)
 	co := encoding.GetCodec(contentType)
 	bytes, _ := co.Marshal(m)
-	var m2 *testModel
+	var m2 map[string]float32
 	_ = co.Unmarshal(bytes, &m2)
 	t.Log(m2)
 }
