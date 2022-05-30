@@ -10,7 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/valyala/fasthttp"
 	"github.com/vmihailenco/msgpack/v5"
-	"net"
 	"net/url"
 	"time"
 )
@@ -51,13 +50,6 @@ func Logger(logger log.Logger) ServerOption {
 	}
 }
 
-// Listener with server lis
-func Listener(lis net.Listener) ServerOption {
-	return func(s *Server) {
-		s.lis = lis
-	}
-}
-
 // Middleware with server middleware
 func Middleware(ms ...fiber.Handler) ServerOption {
 	return func(s *Server) {
@@ -85,7 +77,6 @@ type initRouters func(r fiber.Router)
 type Server struct {
 	server   *fiber.App
 	baseCtx  context.Context
-	lis      net.Listener
 	tlsConf  *tls.Config
 	endpoint *url.URL
 	err      error
@@ -121,12 +112,12 @@ func NewServer(opts ...ServerOption) *Server {
 
 // Serve serves the server by options.
 func (s *Server) Serve() error {
-	return s.server.Listener(s.lis)
+	return s.server.Listen(s.address)
 }
 
 // ServeTLS TODO: not implemented yet
 func (s *Server) ServeTLS() error {
-	return s.server.Listener(s.lis)
+	return s.server.Listen(s.address)
 }
 
 // Endpoint returns the endpoint of the server.
@@ -143,7 +134,7 @@ func (s *Server) Start(ctx context.Context) error {
 		return s.err
 	}
 	s.baseCtx = ctx
-	s.log.Infof("[FIBER] server listening on: %s", s.lis.Addr().String())
+	s.log.Infof("[FIBER] server listening on: %s", s.address)
 	var err error
 	if s.tlsConf != nil {
 		err = s.ServeTLS()
@@ -179,16 +170,8 @@ func (s *Server) OnStop(f func() error) {
 
 // listenAndEndpoint listen and get the endpoint.
 func (s *Server) listenAndEndpoint() error {
-	if s.lis == nil {
-		lis, err := net.Listen(s.network, s.address)
-		if err != nil {
-			return err
-		}
-		s.lis = lis
-	}
-	addr, err := host.Extract(s.address, s.lis)
+	addr, err := host.ExtractEndpoint(s.address)
 	if err != nil {
-		_ = s.lis.Close()
 		return err
 	}
 	s.endpoint = endpoint.NewEndpoint("http", addr, s.tlsConf != nil)

@@ -88,3 +88,52 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 	}
 	return "", nil
 }
+
+// Extract returns a private addr and port.
+func ExtractEndpoint(hostPort string) (string, error) {
+	addr, port, err := net.SplitHostPort(hostPort)
+	if err != nil {
+		return "", err
+	}
+	if len(addr) > 0 && (addr != "0.0.0.0" && addr != "[::]" && addr != "::") {
+		return net.JoinHostPort(addr, port), nil
+	}
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return "", err
+	}
+	lowest := int(^uint(0) >> 1)
+	var result net.IP
+	for _, iface := range ifaces {
+		if (iface.Flags & net.FlagUp) == 0 {
+			continue
+		}
+		if iface.Index < lowest || result == nil {
+			lowest = iface.Index
+		} else if result != nil {
+			continue
+		}
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, rawAddr := range addrs {
+			var ip net.IP
+			switch addr := rawAddr.(type) {
+			case *net.IPAddr:
+				ip = addr.IP
+			case *net.IPNet:
+				ip = addr.IP
+			default:
+				continue
+			}
+			if isValidIP(ip.String()) {
+				result = ip
+			}
+		}
+	}
+	if result != nil {
+		return net.JoinHostPort(result.String(), port), nil
+	}
+	return "", nil
+}

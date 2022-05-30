@@ -2,7 +2,6 @@ package xhttp
 
 import (
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -14,18 +13,16 @@ import (
 func TestServer(t *testing.T) {
 	//middleware.RegisterMiddleware(middleware.AuthenticatorCfg, &auth{})
 	httpSrv := NewServer(
-		Address(":19000"),
+		FiberConfig(fiber.Config{Prefork: true}),
+		Address("0.0.0.0:18000"),
 		Router(func(r fiber.Router) {
 			r.Get("api", func(ctx *fiber.Ctx) error {
 				return ctx.JSON(fiber.Map{"status": http.StatusOK, "path": ctx.Path()})
 			})
 		}),
 		Middleware(
-			recover.New(recover.Config{
-				EnableStackTrace: true,
-			}),
-			logger.New(logger.ConfigDefault),
-			middleware.Authenticator(),
+			recover.New(),
+			logger.New(),
 		),
 	)
 	httpSrv.Route(func(r fiber.Router) {
